@@ -1,0 +1,120 @@
+class Selector {
+
+    field int posX, posY;      // position
+    field ConwayGrid grid;         // pointer to ConwayGrid
+    field int blinkCounter;    // counter to block
+    field int blinkState;      // blink state
+
+    constructor Selector new(int x, int y, ConwayGrid g) {
+        let posX = x;
+        let posY = y;
+        let grid = g;
+        let blinkCounter = 0;
+        let blinkState   = 0;
+
+        return this;
+    }
+
+    method void flip() {
+        var int temp;
+        let temp = grid.getCell(posY, posX);
+        if (temp) {
+            do grid.setCell(posY, posX, 0);
+        } else {
+            do grid.setCell(posY, posX, 1);
+        }
+        return;
+    }
+
+    method void display() {
+        var int cellSizeX, cellSizeY, x1, y1, x2, y2;
+
+        if (blinkCounter > 1) {
+            let blinkCounter = 0;
+            let blinkState = 1 - blinkState;
+        }
+
+        if (blinkState = 1) {
+            do Screen.setColor(true); 
+        } else {
+            do Screen.setColor(false); 
+        }
+
+        let cellSizeX = grid.getCellSizeX();
+        let cellSizeY = grid.getCellSizeY();
+        let x1 = posX * cellSizeX;
+        let y1 = posY * cellSizeY;
+        let x2 = (posX + 1) * cellSizeX - 1;
+        let y2 = (posY + 1) * cellSizeY - 1;
+
+        do Screen.drawRectangle(x1, y1, x2, y1);
+        do Screen.drawRectangle(x1, y1, x1, y2);
+        do Screen.drawRectangle(x2, y1, x2, y2);
+        do Screen.drawRectangle(x1, y2, x2, y2);
+
+        do Screen.drawRectangle(x1+1, y1+1, x2-1, y1+1);
+        do Screen.drawRectangle(x1+1, y1+1, x1+1, y2-1);
+        do Screen.drawRectangle(x2-1, y1+1, x2-1, y2-1);
+        do Screen.drawRectangle(x1+1, y2-1, x2-1, y2-1);
+
+        let blinkCounter = blinkCounter + 1;
+        return;
+    }
+
+    method void handleKey(char pressed) {
+        var int limit;
+
+        if (pressed = 0) {
+            return;
+        }
+
+        if (pressed = 130) {
+            if (posX > 0) {
+                let posX = posX - 1;
+            }
+            do grid.updateDisplay(posY, posX + 1);
+            return;
+        }
+
+        if (pressed = 131) {
+            if (posY > 0) {
+                let posY = posY - 1;
+            } 
+            do grid.updateDisplay(posY + 1, posX);
+            return;
+        } 
+
+        if (pressed = 132) {
+            let limit = grid.getSizeX();
+            if (posX < (limit - 1)) {
+                let posX = posX + 1;
+            }
+            do grid.updateDisplay(posY, posX - 1);
+            return;
+        } 
+
+        if (pressed = 133) {
+            let limit = grid.getSizeY();
+            if (posY < (limit - 1)) {
+                let posY = posY + 1;
+            }
+            do grid.updateDisplay(posY - 1, posX);
+            return;
+        } 
+
+        if (pressed = 32) {
+            do flip();
+            do grid.updateDisplay(posY, posX);
+            do Sys.wait(180);
+            return;
+        }
+
+        return;
+    }
+
+    method void dispose() {
+        do grid.updateDisplay(posY, posX);
+        return;
+    }
+
+}

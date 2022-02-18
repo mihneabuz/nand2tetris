@@ -1,0 +1,41 @@
+class Main {
+    function void main() {
+        var Game game;
+        var bool begin;
+
+        do Output.println();      // New line
+        do Output.println();      // New line
+        do Output.printString("                  Conway's Game of Life");
+        do Output.println();      // New line
+        do Output.println();      // New line
+        do Output.println();      // New line
+        do Output.println();      // New line
+        do Output.println();      // New line
+        do Output.println();      // New line
+        do Output.printString("       *  Press Enter to begin");
+        do Output.println();      // New line
+        do Output.println();      // New line
+        do Output.printString("       *  Move selector with arrow keys");
+        do Output.println();      // New line
+        do Output.println();      // New line
+        do Output.printString("       *  Use space to toggle cell");
+        do Output.println();      // New line
+        do Output.println();      // New line
+        do Output.printString("       *  Press Enter again to start the automaton");
+
+        while (~(Keyboard.keyPressed() = 128)) {
+            do Sys.wait(10);
+        }
+
+        do Screen.clearScreen();
+        do Sys.wait(500);
+
+        let game = Game.new();
+        do game.init();
+        do Sys.wait(200);
+        do game.run();
+        do game.dispose();
+
+        return;
+    }
+}

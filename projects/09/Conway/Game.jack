@@ -1,0 +1,61 @@
+class Game {
+    field ConwayGrid grid;
+
+    constructor Game new() {
+        let grid = ConwayGrid.newRectangle(32, 16);
+        return this;
+    }
+
+    method void init() {
+        var Selector selector;
+        var char pressed;
+
+        let selector = Selector.new(0, 0, grid);
+
+        while (true) {
+            do selector.display();
+            let pressed = Game.waitForInput(120);
+            do selector.handleKey(pressed);
+
+            if (pressed = 128) {
+                do selector.dispose();
+                return;
+            }
+        }
+        return;
+    }
+
+    method void run() {
+        var int epoch;
+        let epoch = 0;
+
+        while (epoch < 2000) {
+            do grid.step();
+            let epoch = epoch + 1;
+        }
+
+        return;
+    }
+
+    function char waitForInput(int time) {
+        var char pressed;
+        let pressed = 0;
+        while (time > 0) {
+            let pressed = Keyboard.keyPressed(); 
+            if (pressed > 0) {
+                do Sys.wait(time);
+                return pressed;
+            } else {
+                do Sys.wait(10);
+                let time = time - 10;
+            }
+        }
+
+        return 0;
+    }
+    
+    method void dispose() {
+        do grid.dispose();
+        return;
+    }
+}

@@ -1,0 +1,115 @@
+function Game.new 0
+push constant 1
+call Memory.alloc 1
+pop pointer 0
+push constant 32
+push constant 16
+call ConwayGrid.newRectangle 2
+pop this 0
+push pointer 0
+return
+function Game.init 2
+push argument 0
+pop pointer 0
+push constant 0
+push constant 0
+push this 0
+call Selector.new 3
+pop local 0
+label WHILE_EXPR_1
+push constant 0
+not
+not
+if-goto WHILE_END_1
+push local 0
+call Selector.display 1
+pop temp 0
+push constant 120
+call Game.waitForInput 1
+pop local 1
+push local 0
+push local 1
+call Selector.handleKey 2
+pop temp 0
+push local 1
+push constant 128
+eq
+not
+if-goto IF_EXPR_2
+push local 0
+call Selector.dispose 1
+pop temp 0
+push constant 0
+return
+goto IF_END_2
+label IF_EXPR_2
+label IF_END_2
+goto WHILE_EXPR_1
+label WHILE_END_1
+push constant 0
+return
+function Game.run 1
+push argument 0
+pop pointer 0
+push constant 0
+pop local 0
+label WHILE_EXPR_3
+push local 0
+push constant 2000
+lt
+not
+if-goto WHILE_END_3
+push this 0
+call ConwayGrid.step 1
+pop temp 0
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXPR_3
+label WHILE_END_3
+push constant 0
+return
+function Game.waitForInput 1
+push constant 0
+pop local 0
+label WHILE_EXPR_4
+push argument 0
+push constant 0
+gt
+not
+if-goto WHILE_END_4
+call Keyboard.keyPressed 0
+pop local 0
+push local 0
+push constant 0
+gt
+not
+if-goto IF_EXPR_5
+push argument 0
+call Sys.wait 1
+pop temp 0
+push local 0
+return
+goto IF_END_5
+label IF_EXPR_5
+push constant 10
+call Sys.wait 1
+pop temp 0
+push argument 0
+push constant 10
+sub
+pop argument 0
+label IF_END_5
+goto WHILE_EXPR_4
+label WHILE_END_4
+push constant 0
+return
+function Game.dispose 0
+push argument 0
+pop pointer 0
+push this 0
+call ConwayGrid.dispose 1
+pop temp 0
+push constant 0
+return

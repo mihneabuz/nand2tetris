@@ -1,0 +1,173 @@
+class ConwayGrid {
+
+    field int sizeX, sizeY;
+    field int cellX, cellY;
+    field Array grid;
+    field Array temp;
+
+    constructor ConwayGrid newSquare(int gridSize) {
+        var int i;
+
+        let sizeX = gridSize;
+        let sizeY = gridSize;
+        let cellX = Math.divide(512, sizeX);
+        let cellY = Math.divide(256, sizeY);
+        let grid = Array.new(gridSize * gridSize);
+        let temp = Array.new(gridSize * gridSize);
+
+        return this;
+    }
+
+    constructor ConwayGrid newRectangle(int gridSizeX, int gridSizeY) {
+        var int i;
+
+        let sizeX = gridSizeX;
+        let sizeY = gridSizeY;
+        let cellX = Math.divide(512, sizeX);
+        let cellY = Math.divide(256, sizeY);
+        let grid = Array.new(gridSizeY * gridSizeX);
+        let temp = Array.new(gridSizeY * gridSizeX);
+
+        return this;
+    }
+
+    method int getSizeX() {
+        return sizeX;
+    }
+
+    method int getSizeY() {
+        return sizeY;
+    }
+
+    method int getCellSizeX() {
+        return cellX;
+    }
+
+    method int getCellSizeY() {
+        return cellY;
+    }
+
+    method int getCell(int i, int j) { 
+        return grid[(i * sizeX) + j];
+    }
+
+    method int getTempCellChecked(int i, int j) {
+        if (i < 0) {
+            return 0;    
+        } else {
+            if (i = sizeY) {
+                return 0;    
+            } else {
+                if (j < 0) {
+                    return 0;    
+                } else {
+                    if (j = sizeX) {
+                        return 0;    
+                    } else {
+                        return temp[(i * sizeX) + j];
+                    }
+                }
+            }
+        }
+    }
+
+    method void setCell(int i, int j, int value) {
+        let grid[(i * sizeX) + j] = value;
+        return;
+    }
+
+    method void step() {
+        var Array swap;
+        var int i, j, value, neighs;
+
+        let swap = temp;
+        let temp = grid;
+        let grid = swap;
+        
+        let i = 0;
+        while (i < sizeY) {
+            let j = 0;
+            while (j < sizeX) {
+                let value = temp[(i * sizeX) + j];
+                let neighs = 0;
+                let neighs = neighs + getTempCellChecked((i - 1), (j - 1));
+                let neighs = neighs + getTempCellChecked((i + 1), (j - 1));
+                let neighs = neighs + getTempCellChecked( i,      (j - 1));
+                let neighs = neighs + getTempCellChecked((i - 1), (j + 1));
+                let neighs = neighs + getTempCellChecked((i + 1), (j + 1));
+                let neighs = neighs + getTempCellChecked( i,      (j + 1));      
+                let neighs = neighs + getTempCellChecked((i - 1),  j);      
+                let neighs = neighs + getTempCellChecked((i + 1),  j);      
+
+                if (value = 1) {
+                    if (neighs = 2) {
+                        let grid[(i * sizeX) + j] = 1;
+                    } else {
+                        if (neighs = 3) {
+                            let grid[(i * sizeX) + j] = 1;
+                        } else {
+                            let grid[(i * sizeX) + j] = 0;
+                            do updateDisplay(i, j);
+                        }
+                    }
+                }
+
+                if (value = 0) {
+                    if (neighs = 3) {
+                        let grid[(i * sizeX) + j] = 1;
+                        do updateDisplay(i, j);
+                    } else {
+                        let grid[(i * sizeX) + j] = 0;
+                    } 
+                } 
+
+                let j = j + 1;
+            }
+
+            let i = i + 1;
+        }
+
+        return;        
+    }
+
+    method void updateDisplay(int i, int j) {
+        var int x1, y1, temp;
+        if (grid[(i * sizeX) + j] = 1) {
+            do Screen.setColor(true);
+        } else {
+            do Screen.setColor(false);
+        }
+
+        let x1 = cellX * j;
+        let y1 = cellY * i;
+        do Screen.drawRectangle(x1, y1, (x1 + cellX) - 1, (y1 + cellY) - 1);
+
+        return;
+    }
+
+    method void display() {
+        var int i, j, temp, x1, y1;
+        do Screen.setColor(true);
+
+        let i = 0;
+        while (i < sizeY) {
+            let j = 0;
+            while (j < sizeX) {
+                let temp = grid[i * sizeX + j];
+                if (temp) {
+                    let x1 = cellX * j;
+                    let y1 = cellY * i;
+                    do Screen.drawRectangle(x1, y1, (x1 + cellX) - 1, (y1 + cellY) - 1);
+                }
+                let j = j + 1;
+            }
+            let i = i + 1;
+        }
+        return;
+    }
+
+    method void dispose() {
+        do grid.dispose();
+        return;
+    }
+}

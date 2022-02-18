@@ -1,0 +1,167 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Math.jack
+
+/**
+ * A library of commonly used mathematical functions.
+ * Note: Jack compilers implement multiplication and division using OS method calls.
+ */
+class Math {
+
+    static Array nthBit;
+
+    /** Initializes the library. */
+    function void init() {
+        let nthBit = Array.new(16);
+
+        let nthBit[0] = 1;
+        let nthBit[1] = 2;
+        let nthBit[2] = 4;
+        let nthBit[3] = 8;
+        let nthBit[4] = 16;
+        let nthBit[5] = 32;
+        let nthBit[6] = 64;
+        let nthBit[7] = 128;
+        let nthBit[8] = 256;
+        let nthBit[9] = 512;
+        let nthBit[10] = 1024;
+        let nthBit[11] = 2048;
+        let nthBit[12] = 4096;
+        let nthBit[13] = 8192;
+        let nthBit[14] = 16384;
+        let nthBit[15] = 16384+16384;
+
+        return;
+    }
+
+    /** Returns the absolute value of x. */
+    function int abs(int x) {
+        if (x < 0) {
+            return -x;
+        }
+        return x;
+    }
+
+    /** Returns the product of x and y. 
+     *  When a Jack compiler detects the multiplication operator '*' in the 
+     *  program's code, it handles it by invoking this method. In other words,
+     *  the Jack expressions x*y and multiply(x,y) return the same value.
+     */
+    function int multiply(int x, int y) {
+        var int i, sum, temp;
+
+        let sum = 0;
+        let temp = x;
+
+        let i = 0;
+        while (i < 16) {
+            if (Math.getBit(y, i)) {
+                let sum = sum + temp;
+            }
+
+            let temp = temp + temp;
+            let i = i + 1;
+        }
+
+        return sum; 
+    }
+
+    /** Returns the integer part of x/y.
+     *  When a Jack compiler detects the multiplication operator '/' in the 
+     *  program's code, it handles it by invoking this method. In other words,
+     *  the Jack expressions x/y and divide(x,y) return the same value.
+     */
+    function int divide(int x, int y) {
+        var int signX, signY;
+
+        if (y = 0) {
+            do Sys.error(1);
+        }
+
+        let signX = x < 0;
+        let signY = y < 0;
+
+        if (signX = signY) {
+            return Math.udivide(Math.abs(x), Math.abs(y));
+        } else {
+            return -(Math.udivide(Math.abs(x), Math.abs(y)));
+        }
+    }
+
+    function int udivide(int x, int y) {
+        var int q;
+
+        if (y > x) {
+            return 0;
+        }
+
+        let q = Math.udivide(x, y + y);
+        if ((x - ((q + q) * y)) < y) {
+            return q + q;
+        } else {
+            return q + q + 1;
+        }
+    }
+
+    /** Returns the integer part of the square root of x. */
+    function int sqrt(int x) {
+        var int l, r, m, temp;
+
+        if ((x = 0) | (x = 1)) {
+            return x;
+        }
+
+        let l = 1;
+        let r = 182;
+
+        while (l < (r - 1)) {
+            let m = (l + r) / 2;
+            let temp = m * m;
+
+            if (temp = x) {
+                return m;
+            }
+
+            if (temp > x) {
+                let r = m;
+            } else {
+                let l = m;
+            }
+        }
+
+        return l;
+    }
+
+    /** Returns the greater number. */
+    function int max(int a, int b) {
+        if (a > b) {
+            return a;
+        } else {
+            return b;
+        }
+    }
+
+    /** Returns the smaller number. */
+    function int min(int a, int b) {
+        if (a < b) {
+            return a;
+        } else {
+            return b;
+        }
+    }
+
+    /** Gets value of i-th bit */
+    function int getBit(int x, int i) {
+        return ~((x & nthBit[i]) = 0);
+    }
+
+    /** Sets i-th bit to value */
+    function int setBit(int x, int i, boolean val) {
+        if (val) {
+            return x | nthBit[i];
+        } else {
+            return x & (~nthBit[i]);
+        }
+    }
+}

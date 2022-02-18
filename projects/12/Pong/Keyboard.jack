@@ -1,0 +1,132 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Keyboard.jack
+
+/**
+ * A library for handling user input from the keyboard.
+ */
+class Keyboard {
+
+    static int addr;
+
+    /** Initializes the keyboard. */
+    function void init() {
+        let addr = 24576;
+        return;
+    } 
+
+    /**
+     * Returns the character of the currently pressed key on the keyboard;
+     * if no key is currently pressed, returns 0.
+     *
+     * Recognizes all ASCII characters, as well as the following keys:
+     * new line = 128 = String.newline()
+     * backspace = 129 = String.backspace()
+     * left arrow = 130
+     * up arrow = 131
+     * right arrow = 132
+     * down arrow = 133
+     * home = 134
+     * End = 135
+     * page up = 136
+     * page down = 137
+     * insert = 138
+     * delete = 139
+     * ESC = 140
+     * F1 - F12 = 141 - 152
+     */
+    function char keyPressed() {
+        return Memory.peek(addr);
+    }
+
+    /**								
+     * Waits until a key is pressed on the keyboard and released,
+     * then echoes the key to the screen, and returns the character 
+     * of the pressed key.
+     */
+    function char readChar() {
+        var char pressed;
+
+        let pressed = Keyboard.keyPressed();
+        while (pressed = 0) {
+            // sample
+            let pressed = Keyboard.keyPressed();
+        }
+
+        while (pressed = Keyboard.keyPressed()) {
+            // wait
+        }
+
+        return pressed;
+    }
+
+    /**								
+     * Displays the message on the screen, reads from the keyboard the entered
+     * text until a newline character is detected, echoes the text to the screen,
+     * and returns its value. Also handles user backspaces.
+     */
+    function String readLine(String message) {
+        var char read;
+        var String builder;
+
+        do Output.printString(message);
+
+        let builder = String.new(64);
+
+        let read = Keyboard.readChar();
+        while (~(read = 128)) {
+            
+            if (read = 129) {
+                do builder.eraseLastChar();
+                do Output.backSpace();
+            } else {
+                do builder.appendChar(read);
+                do Output.printChar(read);
+            }
+
+            let read = Keyboard.readChar();
+        }
+
+        do Output.println();
+
+        return builder;
+    }   
+
+    /**								
+     * Displays the message on the screen, reads from the keyboard the entered
+     * text until a newline character is detected, echoes the text to the screen,
+     * and returns its integer value (until the first non-digit character in the
+     * entered text is detected). Also handles user backspaces. 
+     */
+    function int readInt(String message) {
+        var String decimal;
+        var int acc, i, len, sign;
+
+        let decimal = Keyboard.readLine(message);
+        
+        let acc = 0;
+        let len = decimal.length();
+
+        if (decimal.charAt(0) = 45) {
+            let i = 1;
+            let sign = 1;
+        } else {
+            let i = 0;
+            let sign = 0;
+        }
+
+        while (i < len) {
+            let acc = (acc * 10) + (decimal.charAt(i) - 48);
+            let i = i + 1;
+        }
+
+        if (sign) {
+            let acc = -acc;
+        }
+
+        do Output.println();
+
+        return acc;
+    }
+}

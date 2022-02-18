@@ -1,0 +1,267 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Screen.jack
+
+/**
+ * A library of functions for displaying graphics on the screen.
+ * The Hack physical screen consists of 256 rows (indexed 0..255, top to bottom)
+ * of 512 pixels each (indexed 0..511, left to right). The top left pixel on 
+ * the screen is indexed (0,0).
+ */
+class Screen {
+
+    static int startRAM, endRAM; 
+    static boolean color;
+
+    /** Initializes the Screen. */
+    function void init() {
+        let startRAM = 16384;
+        let endRAM = 24575;
+        let color = true;
+        return;
+    }
+
+    /** Erases the entire screen. */
+    function void clearScreen() {
+        var int i;
+
+        let i = startRAM;
+
+        while (i < endRAM) {
+            do Memory.poke(i, 0);
+            let i = i + 1;
+        }
+
+        return;
+    }
+
+    /** Sets the current color, to be used for all subsequent drawXXX commands.
+     *  Black is represented by true, white by false. */
+    function void setColor(boolean b) {
+        let color = b;
+        return;
+    }
+
+    /** Draws the (x,y) pixel, using the current color. */
+    function void drawPixel(int x, int y) {
+        var int address, temp, div;
+
+        // find address
+        let div = x / 16;
+        let address = startRAM + (y * 32) + div;
+
+        // get value from memory
+        let temp = Memory.peek(address);
+
+        // set bit of temp to color
+        let temp = Math.setBit(temp, x - (div * 16), color);
+                
+        do Memory.poke(address, temp);
+    
+        return;
+    }
+
+    /** Draws a line from pixel (x1,y1) to pixel (x2,y2), using the current color. */
+    function void drawLine(int x1, int y1, int x2, int y2) {
+        var int i, j, x, y, dx, dy, diff;
+
+        if (x1 = x2) {
+            let i = Math.min(y1, y2);
+            let j = Math.max(y1, y2) + 1;
+
+            while (i < j) {
+                do Screen.drawPixel(x1, i);
+                let i = i + 1;
+            }
+
+            do Screen.drawPixel(x1, i);
+            return;
+        }
+
+        if (y1 = y2) {
+            let i = Math.min(x1, x2);
+            let j = Math.max(x1, x2);
+
+            do Screen.drawHorizontalLine(i, j, y1);
+            return;
+        }
+
+        let i = 0;
+        let j = 0;
+
+        if (y1 < y2) {
+            let x = x1;
+            let y = y1;
+            let dx = x2 - x1;
+            let dy = y2 - y1;
+        } else {
+            let x = x2;
+            let y = y2;
+            let dx = x1 - x2;
+            let dy = y1 - y2;
+        }
+
+        let diff = 0;
+        if (dx > 0) {
+            while ((i < dx) & (j < dy)) {
+                do Screen.drawPixel(x + i, y + j);
+                if (diff < 0) {
+                    let i = i + 1;
+                    let diff = diff + dy;
+                } else {
+                    let j = j + 1;
+                    let diff = diff - dx;
+                }
+            }
+        } else {
+            let dx = -dx;
+            while ((i < dx) & (j < dy)) {
+                do Screen.drawPixel(x - i, y + j);
+                if (diff < 0) {
+                    let i = i + 1;
+                    let diff = diff + dy;
+                } else {
+                    let j = j + 1;
+                    let diff = diff - dx;
+                }
+            }
+        }
+
+        return;
+    }
+
+    function void drawShortHorizontalLine(int x1, int x2, int y) {
+        var int div1, div2, temp, ptr, i;
+        
+        let div1 = x1 / 16;
+        let div2 = x2 / 16;
+        if (div1 = div2) {
+
+            // fill middle
+            let ptr = startRAM + (y * 32) + div1;
+            let temp = Memory.peek(ptr);
+
+            let div1 = x1 - (div1 * 16);
+            let div2 = (x2 - (div2 * 16)) + 1;
+
+            while (div1 < div2) {
+                let temp = Math.setBit(temp, div1, color);
+                let div1 = div1 + 1;
+            }
+
+            do Memory.poke(ptr, temp);
+
+        } else {
+            
+            do Output.printString("YES!");
+
+            // fill first segment
+            let ptr = startRAM + (y * 32) + div1;
+            let temp = Memory.peek(ptr);
+            let div1 = x1 - (div1 * 16);
+            let i = 16;
+
+            while (div1 < i) {
+                let temp = Math.setBit(temp, div1, color);
+                let div1 = div1 + 1;
+            }
+
+            do Memory.poke(ptr, temp);
+
+            // fill last segment
+            let ptr = startRAM + (y * 32) + div2;
+            let temp = Memory.peek(ptr);
+            let i = 0;
+            let div2 = (x2 - (div2 * 16)) + 1;
+
+            while (i < div2) {
+                let temp = Math.setBit(temp, i, color);
+                let i = i + 1;
+            }
+
+            do Memory.poke(ptr, temp);
+        }
+
+        return;
+    }
+
+    function void drawHorizontalLine(int x1, int x2, int y) {
+        var int i, j, ptr, end, temp, k, h;
+
+        if ((x2 - x1) < 16) {
+            do Screen.drawShortHorizontalLine(x1, x2, y);
+            return;
+        } else {
+            let i = x1 / 16;
+            let j = x2 / 16;
+
+            let temp = startRAM + (y * 32);
+            let end = temp + j;
+            let ptr = temp + i;
+
+            // fill first segment
+            let temp = Memory.peek(ptr);
+            let k = x1 - (i * 16);
+            let h = 16;
+
+            while (k < h) {
+                let temp = Math.setBit(temp, k, color);
+                let k = k + 1;
+            }
+
+            do Memory.poke(ptr, temp);
+
+            // fill last segment
+            let temp = Memory.peek(end);
+            let k = 0;
+            let h = (x2 - (j * 16)) + 1;
+
+            while (k < h) {
+                let temp = Math.setBit(temp, k, color);
+                let k = k + 1;
+            }
+
+            do Memory.poke(end, temp);
+
+            // fill rest
+            let ptr = ptr + 1;
+            while (ptr < end) {
+                do Memory.poke(ptr, color);
+                let ptr = ptr + 1;
+            }
+
+            return;
+        }
+    }
+
+    /** Draws a filled rectangle whose top left corner is (x1, y1)
+     * and bottom right corner is (x2,y2), using the current color. */
+    function void drawRectangle(int x1, int y1, int x2, int y2) {
+        let y2 = y2 + 1;
+        while (y1 < y2) {
+            do Screen.drawHorizontalLine(x1, x2, y1);
+            let y1 = y1 + 1;
+        }
+
+        return;
+    }
+
+    /** Draws a filled circle of radius r<=181 around (x,y), using the current color. */
+    function void drawCircle(int x, int y, int r) {
+        var int i, j, dx, dy, r2;
+
+        let i = -r;
+        let j = r;
+        let r2 = r * r;
+
+        while (i < j) {
+            let dy = y + i;
+            let dx = Math.sqrt(r2 - (i * i));
+
+            do Screen.drawHorizontalLine(x - dx, x + dx, y + i);
+            let i = i + 1;
+        }
+        return;
+    }
+}
